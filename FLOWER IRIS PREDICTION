@@ -1,0 +1,42 @@
+import numpy as np #numerical python module
+import pandas as pd #csv file execute to use pandas
+import seaborn as sns # use a plots,graphs
+sns.set_palette('husl')
+import matplotlib.pyplot as plt # use a matplotlib in graphs
+from sklearn.model_selection import train_test_split #split a size train and test
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score
+from sklearn.svm import SVC # classification ayita svc ,regression ayita svr
+url = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/iris.csv'
+col_name = ['sepal-lenght','sepal-width','petal-lenght','petal-width','class']
+dataset = pd.read_csv(url, names = col_name)
+sns.violinplot(y='class', x='sepal-lenght', data=dataset, inner='quartile')
+plt.show()
+sns.violinplot(y='class', x='sepal-width', data=dataset, inner='quartile')
+plt.show()
+sns.violinplot(y='class', x='petal-lenght', data=dataset, inner='quartile')
+plt.show()
+sns.violinplot(y='class', x='petal-width', data=dataset, inner='quartile')
+plt.show()
+X = dataset.drop(['class'], axis=1)
+y = dataset['class']
+print(f'X shape: {X.shape} | y shape: {y.shape} ')
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=1)
+models = []
+models.append(('SVC', SVC(gamma='auto'))) # gamma is a kernal
+# evaluate each model in turn
+results = []
+model_names = []
+for name, model in models:
+  kfold = StratifiedKFold(n_splits=10, random_state=1, shuffle=True) #
+  cv_results = cross_val_score(model, X_train, y_train, cv=kfold, scoring='accuracy')
+  results.append(cv_results)
+  model_names.append(name)
+  print('%s: %f (%f)' % (name, cv_results.mean(), cv_results.std()))
+  model = SVC(gamma='auto')
+model.fit(X_train, y_train)
+prediction = model.predict(X_test)
+print(f'Test Accuracy: {accuracy_score(y_test, prediction)}')
+print(f'Classification Report: \n {classification_report(y_test, prediction)}')
